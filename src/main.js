@@ -6,12 +6,12 @@ import {bindActionCreators} from 'redux';
 
 import Menu from './components/menu'
 //action gets user info on every mount
-//import {getUser} from './actions/authentication';
+import {getUser} from './actions/authentication';
 
 class Main extends React.Component{
   componentDidMount(){
     console.log("CDM Mounted for Main")
-    //this.props.getUser()
+    this.props.getUser()
   }
     render(){
       return (
@@ -31,4 +31,4 @@ function mapDispatchToProps(dispatch){
           getUser:getUser
           }, dispatch)
 }
-export default (Main)
+export default connect(mapStateToProps,mapDispatchToProps)(Main)

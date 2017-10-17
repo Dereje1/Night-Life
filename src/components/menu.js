@@ -5,8 +5,7 @@ import {Nav, NavItem, Navbar, Button} from 'react-bootstrap';
 
 class Menu extends React.Component{
   conditionalNav(){
-    //let autenticationStatus = this.props.user.user.authenticated
-    let autenticationStatus = false
+    let autenticationStatus = this.props.user.user.authenticated
     if(autenticationStatus){//the way response comes of user is in string I can change this to JSON response in the future
       return(
         <Nav pullRight>
@@ -26,13 +25,12 @@ class Menu extends React.Component{
   }
 
   render(){
-    //let bcolor = (this.props.user.user.authenticated) ? "yellow" : "white"
-    let bcolor ="white"
+    let bcolor = (this.props.user.user.authenticated) ? "yellow" : "white"
     return(
     <Navbar fixedTop>
         <Navbar.Header>
           <Navbar.Brand>
-            <a href="/" style={{"color":bcolor}}>Voting App</a>
+            <a href="/" style={{"color":bcolor}}>Night Life Coordination App</a>
           </Navbar.Brand>
           <Navbar.Toggle />
         </Navbar.Header>
@@ -49,4 +47,4 @@ class Menu extends React.Component{
 function mapStateToProps(state){
   return state
 }
-export default (Menu)
+export default connect(mapStateToProps)(Menu)

@@ -32,7 +32,7 @@ class About extends React.Component{
         aria-labelledby="contained-modal-title"
       >
         <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title">Voting App</Modal.Title>
+          <Modal.Title id="contained-modal-title">Night Life Coordination App</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <h5 className="text-center">Coded by <a href="https://www.freecodecamp.com/dereje1" target="_blank">DGetahun</a></h5>
