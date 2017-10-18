@@ -2,6 +2,9 @@ var express = require('express');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var axios = require('axios')
+var queryString = require('query-string');
+var yelptoken = require('./yelptoken')
+// now just use the cache
 
 var app = express();
 
@@ -13,23 +16,21 @@ app.use(cookieParser());
 var db = require('./models/db') //mongoose required schema
 
 //Get all Polls/single poll or user defined polls
-app.get('/yelp', function(req,res){
-  console.log("proxy called!!")
-  let location = req.params.loc
-  let url="https://api.yelp.com/oauth2/token/"
-  let pObject=JSON.stringify({
-    'grant_type':"client_credentials",
-    'client_id': process.env.YELP_ClIENT_ID,
-    'client_secret': process.env.YELP_CLIENT_SECRET
-  })
-  axios.post(url,(pObject))
-    .then(function(response){
-      console.log(response.data)
-       res.json({"yelp":response})
-     })
+app.get('/yelp/:loc', function(req,res){
+    console.log(req.params.loc)
+    yelptoken().then(function(token){
+      axios.get("https://api.yelp.com/v3/businesses/search?term=bars nightclubs&location="+req.params.loc+"&limit=10",{
+          headers:{"Authorization" : token.token_type+" "+token.access_token}
+        })
+        .then(function(response) {
+         res.json(response.data);
+        })
+        .catch(function(err){
+          res.json(err);
+        });
+    })
     .catch(function(err){
-      console.log(err)
-      res.json({"yelp":err})
+      res.json(err)
     })
 })
 

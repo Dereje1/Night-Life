@@ -1,8 +1,8 @@
 var express = require('express');
 var path = require('path');
 
-
 var app = module.exports = express();
+
 var httpProxy = require('http-proxy');
 // Set up PROXY server with the module from above
 const apiProxy = httpProxy.createProxyServer(
