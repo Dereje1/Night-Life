@@ -1,45 +1,24 @@
 var express = require('express');
 var path = require('path');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
 
 
-var app = express();
+var app = module.exports = express();
+var httpProxy = require('http-proxy');
+// Set up PROXY server with the module from above
+const apiProxy = httpProxy.createProxyServer(
+  {target:"http://localhost:3001"}
+)
+//apply middleware that intercepts all requests to the /api and retrieves the resources from the prxy
 
-//authentication additional requirements
-var mongoose = require('mongoose');
-var passport = require('passport');
-var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
+app.use('/api',function(req,res){
+  apiProxy.web(req,res)
+})
 
-
-
-// configuration  for authentication===============================================================
+//end proxy setup
 var db = require('./models/db')
 
-require('./config/passport')(passport); // pass passport for configuration
+require('./authserver')
 
-// set up our express application
-app.use(logger('dev')); // log every request to the console
-app.use(cookieParser()); // read cookies (needed for auth)
-app.use(bodyParser.json()); // get information from html forms
-
-
-// required for passport
-app.use(session(
-  { secret: 'jajadaexxjjd23sddseeazzooeessssz',
-    store: new MongoStore({ mongooseConnection: mongoose.connection }),//warning in node if this option is not included
-    resave: true,
-    saveUninitialized: true
-  }
-)); // session secret
-app.use(passport.initialize());
-app.use(passport.session()); // persistent login sessions
-
-// routes ======================================================================
-require('./routes/authenticroutes.js')(app, passport); // load our routes and pass in our app and fully configured passport
-//end authentication
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('*', function(req, res){

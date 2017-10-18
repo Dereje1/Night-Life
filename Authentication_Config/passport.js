@@ -59,7 +59,7 @@ module.exports = function(passport) {
                     return done(null, user); // user found, return that user
                 } else {
                     // if there is no user, create them
-                    var newUser                 = new User();
+                    var newUser = new User();
 
                     // set all of the user data that we need
                     newUser.twitter.id          = profile.id;
