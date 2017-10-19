@@ -3,7 +3,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var axios = require('axios')
 var queryString = require('query-string');
-var yelptoken = require('./yelptoken')
+var yelptoken = require('./thirdpartyapis/yelptoken')
 // now just use the cache
 
 var app = express();
@@ -14,16 +14,27 @@ app.use(cookieParser());
 
 //APIs Start
 var db = require('./models/db') //mongoose required schema
-
+var Venues= require('./models/yelpvenues')
 //Get all Polls/single poll or user defined polls
 app.get('/yelp/:loc', function(req,res){
     console.log(req.params.loc)
+
     yelptoken().then(function(token){
       axios.get("https://api.yelp.com/v3/businesses/search?term=bars nightclubs&location="+req.params.loc+"&limit=10",{
           headers:{"Authorization" : token.token_type+" "+token.access_token}
         })
         .then(function(response) {
-         res.json(response.data);
+         Venues.remove({},function(err,d){
+               let venuesToAdd = {
+                 yelpFullResult:response.data
+               }
+               Venues.create(venuesToAdd,function(err,venues){
+                 if(err){
+                   throw err;
+                 }
+                 res.json(venues);
+               })
+           });
         })
         .catch(function(err){
           res.json(err);

@@ -5,6 +5,7 @@ import {bindActionCreators} from 'redux';
 import {browserHistory} from 'react-router'; //need for redirecting user
 import {Grid,Col,Row,ListGroup,ListGroupItem} from 'react-bootstrap'
 
+import {fetchVenues} from '../actions/venueaction'
 class Home extends React.Component{
   constructor(props){
     super(props)
@@ -12,21 +13,36 @@ class Home extends React.Component{
   }
   componentDidMount(){
     console.log("CDM Mounted for home")
-
+    this.props.fetchVenues()
   }
   goToPoll(poll){//goest to a specific poll clicked by user
   }
 
   render(){
-    return (
-      <Grid >
-        <Row style={{"marginTop":"25px"}}>
-          <Col xs={8} xsOffset={2}>
-            <h1>Home</h1>
-          </Col>
-        </Row>
-      </Grid>
-    )
+
+    if(this.props.venues.venues.length){
+      return (
+        <Grid >
+          <Row style={{"marginTop":"25px"}}>
+            <Col xs={8} xsOffset={2}>
+              <p>{JSON.stringify(this.props.venues.venues)}</p>
+            </Col>
+          </Row>
+        </Grid>
+      )
+    }
+    else{
+      return (
+        <Grid >
+          <Row style={{"marginTop":"25px"}}>
+            <Col xs={8} xsOffset={2}>
+              <h1>Loading Venues....</h1>
+            </Col>
+          </Row>
+        </Grid>
+      )
+    }
+
   }
 }
 
@@ -35,7 +51,7 @@ function mapStateToProps(state){
 }
 function mapDispatchToProps(dispatch){
   return bindActionCreators({
-          getPolls:getPolls
+          fetchVenues:fetchVenues
           }, dispatch)
 }
-export default (Home)
+export default connect(mapStateToProps,mapDispatchToProps)(Home)

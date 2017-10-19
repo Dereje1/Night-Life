@@ -3,10 +3,10 @@ import {combineReducers} from 'redux';
 
 // HERE IMPORT REDUCERS TO BE COMBINED
 import {userStatusReducer} from './userreducer';
-//import {pollReducer} from './pollreducer';
+import {venueReducer} from './venuereducer';
 
 //HERE COMBINE THE REDUCERS
 export default combineReducers({
-  //pollsCombo: pollReducer,
+  venues: venueReducer,
   user: userStatusReducer
 })

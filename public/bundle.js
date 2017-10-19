@@ -49737,6 +49737,8 @@ var _reactRouter = __webpack_require__(124);
 
 var _reactBootstrap = __webpack_require__(84);
 
+var _venueaction = __webpack_require__(418);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -49759,6 +49761,7 @@ var Home = function (_React$Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       console.log("CDM Mounted for home");
+      this.props.fetchVenues();
     }
   }, {
     key: 'goToPoll',
@@ -49767,23 +49770,44 @@ var Home = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      return _react2.default.createElement(
-        _reactBootstrap.Grid,
-        null,
-        _react2.default.createElement(
-          _reactBootstrap.Row,
-          { style: { "marginTop": "25px" } },
+
+      if (this.props.venues.venues.length) {
+        return _react2.default.createElement(
+          _reactBootstrap.Grid,
+          null,
           _react2.default.createElement(
-            _reactBootstrap.Col,
-            { xs: 8, xsOffset: 2 },
+            _reactBootstrap.Row,
+            { style: { "marginTop": "25px" } },
             _react2.default.createElement(
-              'h1',
-              null,
-              'Home'
+              _reactBootstrap.Col,
+              { xs: 8, xsOffset: 2 },
+              _react2.default.createElement(
+                'p',
+                null,
+                JSON.stringify(this.props.venues.venues)
+              )
             )
           )
-        )
-      );
+        );
+      } else {
+        return _react2.default.createElement(
+          _reactBootstrap.Grid,
+          null,
+          _react2.default.createElement(
+            _reactBootstrap.Row,
+            { style: { "marginTop": "25px" } },
+            _react2.default.createElement(
+              _reactBootstrap.Col,
+              { xs: 8, xsOffset: 2 },
+              _react2.default.createElement(
+                'h1',
+                null,
+                'Loading Venues....'
+              )
+            )
+          )
+        );
+      }
     }
   }]);
 
@@ -49795,10 +49819,10 @@ function mapStateToProps(state) {
 }
 function mapDispatchToProps(dispatch) {
   return (0, _redux.bindActionCreators)({
-    getPolls: getPolls
+    fetchVenues: _venueaction.fetchVenues
   }, dispatch);
 }
-exports.default = Home;
+exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(Home);
 
 /***/ }),
 /* 414 */
@@ -50007,15 +50031,16 @@ var _redux = __webpack_require__(43);
 
 var _userreducer = __webpack_require__(416);
 
-//import {pollReducer} from './pollreducer';
+var _venuereducer = __webpack_require__(417);
 
 //HERE COMBINE THE REDUCERS
-exports.default = (0, _redux.combineReducers)({
-  //pollsCombo: pollReducer,
-  user: _userreducer.userStatusReducer
-});
+
 
 // HERE IMPORT REDUCERS TO BE COMBINED
+exports.default = (0, _redux.combineReducers)({
+  venues: _venuereducer.venueReducer,
+  user: _userreducer.userStatusReducer
+});
 
 /***/ }),
 /* 416 */
@@ -50038,6 +50063,69 @@ function userStatusReducer() {
       break;
   }
   return state;
+}
+
+/***/ }),
+/* 417 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports.venueReducer = venueReducer;
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function venueReducer() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { venues: [] };
+  var action = arguments[1];
+
+  switch (action.type) {
+    case "GET_VENUES":
+      return _extends({}, state, { venues: [].concat(_toConsumableArray(action.payload)) });
+      break;
+  }
+  return state;
+}
+
+/***/ }),
+/* 418 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+ //gets the api info
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.fetchVenues = fetchVenues;
+
+var _axios = __webpack_require__(394);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function fetchVenues() {
+  return function (dispatch) {
+    _axios2.default.get('/api/yelp/20036').then(function (response) {
+      dispatch({
+        type: "GET_VENUES",
+        payload: [response.data]
+      });
+    }).catch(function (err) {
+      dispatch({
+        type: "GET_VENUES_ERROR",
+        payload: err
+      });
+    });
+  };
 }
 
 /***/ })
