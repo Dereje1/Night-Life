@@ -3,9 +3,11 @@ import React from 'react'
 import {connect} from 'react-redux'
 import {bindActionCreators} from 'redux';
 import {browserHistory} from 'react-router'; //need for redirecting user
-import {Grid,Col,Row,ListGroup,ListGroupItem} from 'react-bootstrap'
+import {findDOMNode} from 'react-dom';
+import {Grid,Col,Row,InputGroup,FormControl,Button,FormGroup,MenuItem} from 'react-bootstrap'
 
 import {fetchVenues} from '../actions/venueaction'
+import Singlevenue from './singlevenue'
 class Home extends React.Component{
   constructor(props){
     super(props)
@@ -15,21 +17,58 @@ class Home extends React.Component{
     console.log("CDM Mounted for home")
     this.props.fetchVenues()
   }
-  goToPoll(poll){//goest to a specific poll clicked by user
+  venueQuery(e){//goest to a specific poll clicked by user
+    event.preventDefault()
+    let venueSearch = findDOMNode(this.refs.venueQ).value.trim()
+    if(e.keyCode===13){
+      this.props.fetchVenues(venueSearch)
+    }
+    if(e==="button"){
+      console.log("Button clicked")
+    }
   }
-
+  parseVenues(){
+    let businesses = this.props.venues.venues[0].yelpFullResult.businesses
+    let venuNames = businesses.map((b,idx)=>{
+      return (<Singlevenue key={idx} business={b}/>)
+    })
+    return(venuNames)
+  }
   render(){
-
+    //let city =
     if(this.props.venues.venues.length){
-      return (
-        <Grid >
-          <Row style={{"marginTop":"25px"}}>
-            <Col xs={8} xsOffset={2}>
-              <p>{JSON.stringify(this.props.venues.venues)}</p>
-            </Col>
-          </Row>
-        </Grid>
-      )
+      if(!this.props.venues.venues[0].error){
+        return (
+          <Grid >
+            <Row>
+            <FormGroup>
+              <InputGroup >
+                <FormControl ref="venueQ"  type="text" onKeyDown={(e)=>this.venueQuery(e)}/>
+                <Button componentClass={InputGroup.Button} type="submit" onClick ={()=>this.venueQuery("button")}><span style={{"fontSize":"20px"}} className="fa fa-location-arrow"/> </Button>
+              </InputGroup>
+            </FormGroup>
+            </Row>
+            <Row className="text-center">
+              <h1>Venues in {this.props.venues.venues[0].yelpFullResult.businesses[0].location.city}</h1>
+            </Row>
+            <Row className="display-flex" style={{"marginTop":"25px"}}>
+                {this.parseVenues()}
+            </Row>
+          </Grid>
+        )
+      }
+     else{
+       return (
+         <Grid >
+           <Row style={{"marginTop":"25px"}}>
+             <Col xs={8} xsOffset={2}>
+               <h1>No Venues Found for {this.props.venues.venues[0].originalRequest}</h1>
+             </Col>
+           </Row>
+         </Grid>
+       )
+     }
+
     }
     else{
       return (

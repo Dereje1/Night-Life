@@ -2,8 +2,15 @@ body {
   margin-top: 50px;
 }
 
-body td, body th {
-  text-align: center;
+body .venueimg {
+  margin-top: 10%;
+  height: 200px;
+  width: 100%;
+}
+
+body .venuecol {
+  background-color: #2f182d;
+  margin-top: 5%;
 }
 
 body a, body a:active, body a:hover, body a:visited, body a:active, body a:hover {

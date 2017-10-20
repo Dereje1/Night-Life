@@ -1,9 +1,10 @@
 "use strict"//gets the api info
 import axios from 'axios'
 
-export function fetchVenues(){
+export function fetchVenues(vquery){
+  if(!vquery){vquery="byip"}
   return function(dispatch){
-    axios.get('/api/yelp/20036')
+    axios.get('/api/yelp/'+vquery)
       .then(function(response){
         dispatch(
           {
@@ -16,7 +17,7 @@ export function fetchVenues(){
         dispatch(
           {
             type:"GET_VENUES_ERROR",
-            payload:err
+            payload:[err]
           }
         )
       })

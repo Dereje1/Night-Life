@@ -5,6 +5,9 @@ export function venueReducer(state={venues:[]},action){
     case "GET_VENUES":
       return {...state, venues: [...action.payload]};
       break;
+    case "GET_VENUES_ERROR":
+      return {...state, venues: [...action.payload]};
+      break;
   }
   return state
 }

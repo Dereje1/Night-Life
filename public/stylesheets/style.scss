@@ -3,8 +3,14 @@ $a-tags: 'a, a:active, a:hover, a:visited, a:active, a:hover';
 
 body{
   margin-top:50px;
-  td,th{
-    text-align: center;
+  .venueimg{
+    margin-top: 10%;
+    height: 200px;
+    width: 100%
+  }
+  .venuecol{
+    background-color: #2f182d;
+    margin-top: 5%;
   }
   #{$a-tags} {
     color: yellow;
