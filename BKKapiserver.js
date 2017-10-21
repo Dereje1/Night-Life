@@ -24,20 +24,16 @@ app.use(cookieParser());
 
 //APIs Start
 var db = require('./models/db') //mongoose required schema
+var Venues= require('./models/yelpvenues')
 //Get all Polls/single poll or user defined polls
 app.get('/yelp/:loc', function(req,res){
-
+    console.log(req.session)
     let headerObject = req.headers //need for ip
     let ip = (headerObject['x-forwarded-for']||req.socket.remoteAddress).split(",")[0];
     ip = (ip === "::ffff:127.0.0.1") ? process.env.LOCAL_IP : ip
     convertIp(ip).then(function(cityData){
       let locationName
       if (req.params.loc === 'byip'){
-        if(req.session.yelpVenues){res.json(req.session.yelpVenues); return;}
-        //if no session stored just go by ip location
-        locationName = cityData.city+","+cityData.region_name
-      }
-      else if(req.params.loc === 'byipforced'){
         locationName = cityData.city+","+cityData.region_name
       }
       else{
@@ -48,12 +44,19 @@ app.get('/yelp/:loc', function(req,res){
             headers:{"Authorization" : token.token_type+" "+token.access_token}
           })
           .then(function(response) {
+           Venues.remove({},function(err,d){
                  let venuesToAdd = {
                    yelpFullResult:response.data,
                    originalRequest: locationName
                  }
-                   req.session.yelpVenues = venuesToAdd
-                   res.json(venuesToAdd);
+                 Venues.create(venuesToAdd,function(err,venues){
+                   if(err){
+                     throw err;
+                   }
+                   req.session.yelpVenues = venues
+                   res.json(venues);
+                 })
+             });
           })
           .catch(function(err){
             let errorToReact = {

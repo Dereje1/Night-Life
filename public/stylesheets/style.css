@@ -2,14 +2,37 @@ body {
   margin-top: 50px;
 }
 
+body .frontpic {
+  width: 75%;
+}
+
 body .venueimg {
   margin-top: 10%;
-  height: 200px;
-  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 992px) {
+  body .venueimg {
+    height: 200px;
+  }
+}
+
+@media (max-width: 992px) and (min-width: 765px) {
+  body .venueimg {
+    height: 300px;
+  }
 }
 
 body .venuecol {
   background-color: #2f182d;
+  margin-top: 5%;
+  white-space: nowrap;
+}
+
+body .goingButton {
+  color: black;
+  font-weight: bold;
+  background-color: #ab99af;
   margin-top: 5%;
 }
 

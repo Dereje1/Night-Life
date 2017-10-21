@@ -1,16 +1,34 @@
 //variable declaration in list form fot links only
+$break-large: 800px;
+$break-mid: 600px;
 $a-tags: 'a, a:active, a:hover, a:visited, a:active, a:hover';
 
 body{
   margin-top:50px;
+  .frontpic{
+    width:75%
+  }
   .venueimg{
     margin-top: 10%;
-    height: 200px;
-    width: 100%
+
+    max-width: 100%;
+    @media (min-width: 992px) {
+          height: 200px;
+        }
+    @media (max-width:992px) and (min-width: 765px) {
+          height: 300px;
+        }
   }
   .venuecol{
     background-color: #2f182d;
     margin-top: 5%;
+    white-space: nowrap;
+  }
+  .goingButton{
+    color:black;
+    font-weight: bold;
+    background-color:#ab99af;
+    margin-top:5%
   }
   #{$a-tags} {
     color: yellow;
