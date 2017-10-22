@@ -24,6 +24,7 @@ app.use(cookieParser());
 
 //APIs Start
 var db = require('./models/db') //mongoose required schema
+var going = require('./models/VenueGoers')
 //Get all Polls/single poll or user defined polls
 app.get('/yelp/:loc', function(req,res){
 
@@ -72,7 +73,36 @@ app.get('/yelp/:loc', function(req,res){
     })
 
 })
+app.post('/yelp',function(req,res){
+  let info=req.body;
+  going.create(info,function(err,goerinfo){
+    if(err){throw(err)}
+    res.json(goerinfo)
+  })
+})
 
+app.get('/going',function(req,res){
+  let query ={}
+  let timediff = Date.now() - 86400000 //remove any going records older than 24hrs
+  let rmvQuery = {timeStamp : { $lt : timediff} }
+  going.remove(rmvQuery,function(err,old){
+    if(err){throw(err)}
+    going.find({},function(err,allgoers){
+      if(err){throw(err)}
+      res.json(allgoers)
+    })
+  })
+})
+
+app.delete('/cancel/:del', function(req,res){
+  var query = JSON.parse(req.params.del);
+  going.remove(query, function(err, venue){
+    if(err){
+    throw err;
+    }
+    res.json(venue);
+  })
+})
 //APIs end
 app.listen(3001,function(err){
   if(err){

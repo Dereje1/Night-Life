@@ -49741,6 +49741,8 @@ var _reactBootstrap = __webpack_require__(58);
 
 var _venueaction = __webpack_require__(414);
 
+var _goingactions = __webpack_require__(420);
+
 var _singlevenue = __webpack_require__(415);
 
 var _singlevenue2 = _interopRequireDefault(_singlevenue);
@@ -49765,8 +49767,11 @@ var Home = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (Home.__proto__ || Object.getPrototypeOf(Home)).call(this, props));
 
     _this.state = {
-      going: []
+      matched: false,
+      userGoingYelpIDs: [],
+      othersGoingYelpIDS: []
     };
+    _this.matchGoersWithVenues = _this.matchGoersWithVenues.bind(_this);
     return _this;
   }
 
@@ -49775,6 +49780,14 @@ var Home = function (_React$Component) {
     value: function componentDidMount() {
       console.log("CDM Mounted for home");
       this.props.fetchVenues();
+      this.props.getGoers();
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate(prevProps, prevState) {
+      if (!this.state.matched) {
+        this.matchGoersWithVenues();
+      }
     }
   }, {
     key: 'goingToVenue',
@@ -49782,31 +49795,71 @@ var Home = function (_React$Component) {
       if (!this.props.user.user.authenticated) {
         window.location = "/auth/twitter";
       } else {
-        if (this.state.going.includes(venueID)) {
-          var copyofGoing = [].concat(_toConsumableArray(this.state.going));
+        if (this.state.userGoingYelpIDs.includes(venueID)) {
+          var cancelInfo = {
+            yelpID: venueID,
+            userName: this.props.user.user.username
+          };
+          var copyofGoing = [].concat(_toConsumableArray(this.state.userGoingYelpIDs));
           var indexOfDeletion = copyofGoing.findIndex(function (v) {
             return v === venueID;
           });
           this.setState({
-            going: [].concat(_toConsumableArray(copyofGoing.slice(0, indexOfDeletion)), _toConsumableArray(copyofGoing.slice(indexOfDeletion + 1)))
-          });
+            userGoingYelpIDs: [].concat(_toConsumableArray(copyofGoing.slice(0, indexOfDeletion)), _toConsumableArray(copyofGoing.slice(indexOfDeletion + 1)))
+          }, this.props.cancelVenue(cancelInfo));
         } else {
+          var addToGoers = {
+            yelpID: venueID,
+            userName: this.props.user.user.username,
+            timeStamp: Date.now()
+          };
           this.setState({
-            going: [].concat(_toConsumableArray(this.state.going), [venueID])
-          });
+            userGoingYelpIDs: [].concat(_toConsumableArray(this.state.userGoingYelpIDs), [venueID])
+          }, this.props.goToVenue(addToGoers));
         }
       }
     }
   }, {
     key: 'venueQuery',
     value: function venueQuery(e) {
-      //goest to a specific poll clicked by user
+      //goest to a specific venue clicked by user
       event.preventDefault();
+      this.setState({ matched: false,
+        userGoingYelpIDs: [],
+        othersGoingYelpIDS: []
+      });
       var venueSearch = (0, _reactDom.findDOMNode)(this.refs.venueQ).value.trim();
       if (e.keyCode === 13) {
         this.props.fetchVenues(venueSearch);
-        window.scroll(0, 600);
+        this.props.getGoers();
+        window.scroll(0, window.innerWidth * 0.43);
       }
+    }
+  }, {
+    key: 'matchGoersWithVenues',
+    value: function matchGoersWithVenues() {
+      if (!this.props.allGoers.allGoers.length) {
+        return;
+      }
+      var allgoing = this.props.allGoers.allGoers[0];
+      var currrentUser = this.props.user.user.username;
+
+      var venuesOfUserGoing = allgoing.filter(function (goers) {
+        return goers.userName === currrentUser;
+      });
+      var userGoing = venuesOfUserGoing.map(function (v) {
+        return v.yelpID;
+      });
+      var venuesOfOthersGoing = allgoing.filter(function (goers) {
+        return goers.userName !== currrentUser;
+      });
+      var othersGoing = venuesOfOthersGoing.map(function (v) {
+        return v.yelpID;
+      });
+      this.setState({ userGoingYelpIDs: userGoing,
+        othersGoingYelpIDS: othersGoing,
+        matched: true
+      });
     }
   }, {
     key: 'parseVenues',
@@ -49815,8 +49868,15 @@ var Home = function (_React$Component) {
 
       var businesses = this.props.venues.venues[0].yelpFullResult.businesses;
       var venuNames = businesses.map(function (b, idx) {
-        var totalGoing = _this2.state.going.includes(b.id) ? 1 : 0;
-        return _react2.default.createElement(_singlevenue2.default, { key: idx, business: b, onClick: _this2.goingToVenue.bind(_this2), going: totalGoing });
+        var userGoing = _this2.state.userGoingYelpIDs.includes(b.id) ? 1 : 0;
+        var othersGoing = _this2.state.othersGoingYelpIDS.reduce(function (acc, curr, idx, arr) {
+          if (arr[idx] === b.id) {
+            return acc + 1;
+          } else {
+            return acc + 0;
+          }
+        }, 0);
+        return _react2.default.createElement(_singlevenue2.default, { key: idx, business: b, onClick: _this2.goingToVenue.bind(_this2), going: userGoing + othersGoing });
       });
       return venuNames;
     }
@@ -49825,9 +49885,18 @@ var Home = function (_React$Component) {
     value: function render() {
       var _this3 = this;
 
-      //let city =
+      var tooltip = _react2.default.createElement(
+        _reactBootstrap.Tooltip,
+        { id: 'tooltip' },
+        _react2.default.createElement(
+          'strong',
+          null,
+          ' Current Location'
+        )
+      );
       if (this.props.venues.venues.length) {
         if (!this.props.venues.venues[0].error) {
+
           return _react2.default.createElement(
             _reactBootstrap.Grid,
             null,
@@ -49849,12 +49918,16 @@ var Home = function (_React$Component) {
                       return _this3.venueQuery(e);
                     }, placeholder: 'enter address, neighborhood, city, state or zip, optional country' }),
                   _react2.default.createElement(
-                    _reactBootstrap.Button,
-                    { componentClass: _reactBootstrap.InputGroup.Button, type: 'submit', onClick: function onClick() {
-                        return _this3.props.fetchVenues('byipforced');
-                      } },
-                    _react2.default.createElement('span', { style: { "fontSize": "20px" }, className: 'fa fa-location-arrow' }),
-                    ' '
+                    _reactBootstrap.OverlayTrigger,
+                    { placement: 'bottom', overlay: tooltip },
+                    _react2.default.createElement(
+                      _reactBootstrap.Button,
+                      { componentClass: _reactBootstrap.InputGroup.Button, type: 'submit', onClick: function onClick() {
+                          _this3.props.fetchVenues('byipforced');_this3.props.getGoers();
+                        } },
+                      _react2.default.createElement('span', { style: { "fontSize": "20px" }, className: 'fa fa-location-arrow' }),
+                      ' '
+                    )
                   )
                 )
               )
@@ -49904,6 +49977,11 @@ var Home = function (_React$Component) {
           null,
           _react2.default.createElement(
             _reactBootstrap.Row,
+            { style: { "marginTop": "25px", "marginBottom": "25px" } },
+            _react2.default.createElement(_reactBootstrap.Image, { className: 'frontpic center-block', src: '/images/Wall_Food.jpg', rounded: true })
+          ),
+          _react2.default.createElement(
+            _reactBootstrap.Row,
             { style: { "marginTop": "25px" } },
             _react2.default.createElement(
               'h1',
@@ -49924,7 +50002,10 @@ function mapStateToProps(state) {
 }
 function mapDispatchToProps(dispatch) {
   return (0, _redux.bindActionCreators)({
-    fetchVenues: _venueaction.fetchVenues
+    fetchVenues: _venueaction.fetchVenues,
+    goToVenue: _goingactions.goToVenue,
+    getGoers: _goingactions.getGoers,
+    cancelVenue: _goingactions.cancelVenue
   }, dispatch);
 }
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(Home);
@@ -49940,6 +50021,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.fetchVenues = fetchVenues;
+exports.goToVenue = goToVenue;
 
 var _axios = __webpack_require__(180);
 
@@ -49960,6 +50042,20 @@ function fetchVenues(vquery) {
     }).catch(function (err) {
       dispatch({
         type: "GET_VENUES_ERROR",
+        payload: [err]
+      });
+    });
+  };
+}function goToVenue(venueToGo) {
+  return function (dispatch) {
+    _axios2.default.post('/api/yelp/', venueToGo).then(function (response) {
+      dispatch({
+        type: "GO_TO_VENUE",
+        payload: [response.data]
+      });
+    }).catch(function (err) {
+      dispatch({
+        type: "GO_TO_VENUE_ERROR",
         payload: [err]
       });
     });
@@ -50258,14 +50354,16 @@ var _userreducer = __webpack_require__(418);
 
 var _venuereducer = __webpack_require__(419);
 
+var _goingreducer = __webpack_require__(421);
+
 //HERE COMBINE THE REDUCERS
-
-
-// HERE IMPORT REDUCERS TO BE COMBINED
 exports.default = (0, _redux.combineReducers)({
   venues: _venuereducer.venueReducer,
-  user: _userreducer.userStatusReducer
+  user: _userreducer.userStatusReducer,
+  allGoers: _goingreducer.goersReducer
 });
+
+// HERE IMPORT REDUCERS TO BE COMBINED
 
 /***/ }),
 /* 418 */
@@ -50317,6 +50415,114 @@ function venueReducer() {
       break;
     case "GET_VENUES_ERROR":
       return _extends({}, state, { venues: [].concat(_toConsumableArray(action.payload)) });
+      break;
+  }
+  return state;
+}
+
+/***/ }),
+/* 420 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+ //gets the api info
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.goToVenue = goToVenue;
+exports.cancelVenue = cancelVenue;
+exports.getGoers = getGoers;
+
+var _axios = __webpack_require__(180);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function goToVenue(venueToGo) {
+  return function (dispatch) {
+    _axios2.default.post('/api/yelp/', venueToGo).then(function (response) {
+      dispatch({
+        type: "GO_TO_VENUE",
+        payload: [response.data]
+      });
+    }).catch(function (err) {
+      dispatch({
+        type: "GO_TO_VENUE_ERROR",
+        payload: [err]
+      });
+    });
+  };
+}function cancelVenue(venueToCancel) {
+  console.log(venueToCancel);
+  return function (dispatch) {
+    _axios2.default.delete('/api/cancel/' + JSON.stringify(venueToCancel)).then(function (response) {
+      dispatch({
+        type: "CANCEL_VENUE",
+        payload: venueToCancel
+      });
+    }).catch(function (err) {
+      dispatch({
+        type: "CANCEL_VENUE_ERROR",
+        payload: [err]
+      });
+    });
+  };
+}
+function getGoers(venueToGo) {
+  return function (dispatch) {
+    _axios2.default.get('/api/going', venueToGo).then(function (response) {
+      dispatch({
+        type: "GET_VENUE_GOERS",
+        payload: [response.data]
+      });
+    }).catch(function (err) {
+      dispatch({
+        type: "GET_VENUE_GOERS_ERROR",
+        payload: [err]
+      });
+    });
+  };
+}
+
+/***/ }),
+/* 421 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports.goersReducer = goersReducer;
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function goersReducer() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { allGoers: [] };
+  var action = arguments[1];
+
+  switch (action.type) {
+    case "GO_TO_VENUE":
+      //let previouslyGoing = [...state.goers.goers]
+      return _extends({}, state, { allGoers: [].concat(_toConsumableArray(state.allGoers), _toConsumableArray(action.payload)) });
+      break;
+    case "CANCEL_VENUE":
+      var venueCopy = [].concat(_toConsumableArray(state.allGoers));
+      var indexOfDeletion = venueCopy.findIndex(function (venue) {
+        return venue.userName === action.payload.userName && venue.yelpID === action.payload.yelpID;
+      });
+      var venuRemoved = [].concat(_toConsumableArray(venueCopy.slice(0, indexOfDeletion)), _toConsumableArray(venueCopy.slice(indexOfDeletion + 1)));
+
+      return indexOfDeletion === -1 ? { allGoers: venueCopy } : { allGoers: venuRemoved };
+      break;
+    case "GET_VENUE_GOERS":
+      return _extends({}, state, { allGoers: [].concat(_toConsumableArray(action.payload)) });
       break;
   }
   return state;
