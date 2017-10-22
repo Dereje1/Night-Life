@@ -147,7 +147,7 @@ class Home extends React.Component{
             <Row>
             <FormGroup>
               <InputGroup >
-                <FormControl ref="venueQ"  type="text" onKeyDown={(e)=>this.venueQuery(e)} style={{"height":"75px","borderRadius":"10px 0 0px 10px","fontSize":"20px"}} placeholder="enter address, neighborhood, city, state or zip, optional country"/>
+                <FormControl ref="venueQ"  type="text" onKeyDown={(e)=>this.venueQuery(e)} style={{"height":"75px","borderRadius":"10px 0 0px 10px","fontSize":"2.5vw"}} placeholder="enter address, neighborhood, city, state or zip, optional country"/>
                 <OverlayTrigger placement="bottom" overlay={tooltip}>
                   <Button componentClass={InputGroup.Button} style={{"height":"75px","borderRadius":"0px 10px 10px 0px"}} type="submit" onClick ={()=>this.venueQuery("loc")}><span style={{"fontSize":"45px"}} className="fa fa-location-arrow"/></Button>
                 </OverlayTrigger>
