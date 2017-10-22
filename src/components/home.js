@@ -66,7 +66,7 @@ class Home extends React.Component{
   }
 
   venueQuery(e){//finds venues per request type
-    event.preventDefault()
+    //event.preventDefault() preventDefaultwoeks in development but not production???
     let venueSearch = findDOMNode(this.refs.venueQ).value.trim()
     if(e.keyCode===13||e==="loc"){//check if enter pressed or location button
       this.setState(
