@@ -1,3 +1,4 @@
+"use strict"
 var express = require('express');
 var path = require('path');
 
@@ -17,8 +18,9 @@ app.use('/api',function(req,res){
 //end proxy setup
 var db = require('./models/db')
 
-require('./authserver')
+require('./authserver')//add authentication
 
+//server primary route
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('*', function(req, res){

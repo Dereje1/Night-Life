@@ -14,7 +14,7 @@ class Singlevenue extends Component {
     }).join(' / ')
     return (
       <Col className="venuecol" xs={12} sm={6} md={4} lg={3}>
-          <Button className="goingButton" block onClick={()=>this.props.onClick(yelpId)}>{this.props.going} Going</Button>
+          <Button className="goingButton" block onClick={()=>this.props.onClick(yelpId)} >{this.props.going} Going</Button>
           <a href={yelpLink} target="_blank">
             <Image className="venueimg center-block" src={thumbSource} rounded />
           </a>

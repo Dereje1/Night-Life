@@ -1,3 +1,4 @@
+"use strict"//uses twitter to authenticate via passport see also /Authentication_Config/ folder
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');

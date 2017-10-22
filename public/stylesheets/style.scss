@@ -29,6 +29,12 @@ body{
     font-weight: bold;
     background-color:#ab99af;
     margin-top:5%
+
+  }
+  .goingButton:focus {
+    outline: none;
+    background-color:#ab99af;
+    color:black;
   }
   #{$a-tags} {
     color: yellow;

@@ -35,7 +35,7 @@ class About extends React.Component{
           <Modal.Title id="contained-modal-title">Night Life Coordination App</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <h5 className="text-center">Coded by <a href="https://www.freecodecamp.com/dereje1" target="_blank">DGetahun</a></h5>
+          <h5>Coded by <a href="https://www.freecodecamp.com/dereje1" target="_blank">DGetahun</a> with JavaScript.</h5>
           <br></br>
           <Table responsive>
               <thead>
@@ -50,18 +50,23 @@ class About extends React.Component{
                   <td> Express / Node.js</td>
                 </tr>
                 <tr>
-                  <td>D3.js</td>
+                  <td>Redux-Thunk</td>
                   <td>Mongoose / Mongodb</td>
                 </tr>
                 <tr>
-                  <td>Javascript</td>
-                  <td>Javascript</td>
+                  <td>React-Bootstrap</td>
+                  <td>Passport.js</td>
                 </tr>
               </tbody>
             </Table>
+          <h5> Data Sources:</h5>
+          <ul>
+            <li><a href="https://www.yelp.com/developers/documentation/v3/get_started" target="_blank">Yelp Fusion API</a></li>
+            <li><a href="https://freegeoip.net/?q=2601:14d:8602:7460:cdf5:63c2:c2c:5fa8" target="_blank">freegeoip.net Geolocation API</a></li>
+          </ul>
         </Modal.Body>
         <Modal.Footer>
-          <h6 className="text-center">Source @ <a href="https://github.com/Dereje1/Voting-App" target="_blank">Github</a></h6>
+          <h6 className="pull-left">Source Code @ <a href="https://github.com/Dereje1/Night-Life" target="_blank">Github</a></h6>
           <Button onClick={this.close.bind(this)}>Close</Button>
         </Modal.Footer>
       </Modal>

@@ -70,7 +70,7 @@ class Home extends React.Component{
     if(e.keyCode===13){
       this.props.fetchVenues(venueSearch)
       this.props.getGoers()
-      window.scroll(0, window.innerWidth*0.43)
+      window.scroll(0, window.innerWidth*0.42)
     }
   }
   matchGoersWithVenues(){
@@ -117,15 +117,15 @@ class Home extends React.Component{
 
         return (
           <Grid >
-            <Row style={{"marginTop":"25px","marginBottom":"25px"}}>
+            <Row style={{"marginTop":"25px","marginBottom":"5px"}}>
               <Image className="frontpic center-block" src="/images/Wall_Food.jpg" rounded />
             </Row>
             <Row>
             <FormGroup>
               <InputGroup >
-                <FormControl ref="venueQ"  type="text" onKeyDown={(e)=>this.venueQuery(e)} placeholder="enter address, neighborhood, city, state or zip, optional country"/>
+                <FormControl ref="venueQ"  type="text" onKeyDown={(e)=>this.venueQuery(e)} style={{"height":"75px","borderRadius":"10px 0 0px 10px","fontSize":"20px"}} placeholder="enter address, neighborhood, city, state or zip, optional country"/>
                 <OverlayTrigger placement="bottom" overlay={tooltip}>
-                  <Button componentClass={InputGroup.Button} type="submit" onClick ={()=>{this.props.fetchVenues('byipforced');this.props.getGoers()}}><span style={{"fontSize":"20px"}} className="fa fa-location-arrow"/> </Button>
+                  <Button componentClass={InputGroup.Button} style={{"height":"75px","borderRadius":"0px 10px 10px 0px"}} type="submit" onClick ={()=>{this.props.fetchVenues('byipforced');this.props.getGoers()}}><span style={{"fontSize":"45px"}} className="fa fa-location-arrow"/></Button>
                 </OverlayTrigger>
               </InputGroup>
             </FormGroup>

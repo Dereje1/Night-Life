@@ -25,7 +25,7 @@ class Menu extends React.Component{
   }
 
   render(){
-    let bcolor = (this.props.user.user.authenticated) ? "yellow" : "white"
+    let bcolor = (this.props.user.user.authenticated) ? "red" : "white"
     return(
     <Navbar fixedTop>
         <Navbar.Header>

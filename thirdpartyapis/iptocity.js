@@ -1,4 +1,4 @@
-"use strict"
+"use strict"//converts ip data to city and sends back as promise
 var axios = require('axios')
 
 module.exports = function(ip){

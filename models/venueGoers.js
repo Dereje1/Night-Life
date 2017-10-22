@@ -1,5 +1,5 @@
 "use strict"
-//mongoose shcema on what to store from yelp
+//mongoose shcema on what to store fror venue goers
 var mongoose = require('mongoose');
 var goingSchema = mongoose.Schema({
    yelpID: String,
