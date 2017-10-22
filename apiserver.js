@@ -28,7 +28,7 @@ app.use(cookieParser());
 
 //APIs Start
 var db = require('./models/db') //mongoose required common db
-var going = require('./models/VenueGoers') // VenueGoers schema
+var going = require('./models/venuegoers') // VenueGoers schema
 
 app.get('/yelp/:loc', function(req,res){//gets yelp data for query or if no query ip/session data
     let headerObject = req.headers //need for ip
