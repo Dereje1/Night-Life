@@ -7,5 +7,5 @@ var goingSchema = mongoose.Schema({
    timeStamp: Number
 });
 
-var venueGoers = mongoose.model('going',goingSchema);
-module.exports = venueGoers;
+//var venueGoers = mongoose.model('going',goingSchema);
+module.exports = mongoose.model('going',goingSchema);

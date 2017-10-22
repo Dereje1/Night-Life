@@ -19,8 +19,8 @@ import About from './components/about'
 import reducers from './reducers/index'
 
 //use logger for debugging only
-const middleware = applyMiddleware(thunk,logger)
-//const middleware = applyMiddleware(thunk)
+//const middleware = applyMiddleware(thunk,logger)
+const middleware = applyMiddleware(thunk)
 const store = createStore(reducers,middleware)
 
 //decalre all routes of application below note that display actually does not have a link going to it , intested I included it in the routes for pulling up a specific poll with id
