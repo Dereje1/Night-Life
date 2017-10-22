@@ -1,4 +1,4 @@
-"use strict"
+"use strict"//gets/deletes/updates going users status into/from store state
 
 export function goersReducer(state={allGoers:[]},action){
   switch(action.type){
@@ -6,13 +6,12 @@ export function goersReducer(state={allGoers:[]},action){
       //let previouslyGoing = [...state.goers.goers]
       return {...state, allGoers: [...state.allGoers,...action.payload]};
       break;
-    case "CANCEL_VENUE":
+    case "CANCEL_VENUE"://note deletion criteria different here from poll project, delete using username AND yelpID
       let venueCopy =  [...state.allGoers]
       let indexOfDeletion = venueCopy.findIndex(function(venue){
         return (venue.userName===action.payload.userName&&venue.yelpID===action.payload.yelpID)
       })
       let venuRemoved = [...venueCopy.slice(0,indexOfDeletion),...venueCopy.slice(indexOfDeletion+1)]
-
       return (indexOfDeletion===-1) ? {allGoers: venueCopy} : {allGoers: venuRemoved};
       break
     case "GET_VENUE_GOERS":

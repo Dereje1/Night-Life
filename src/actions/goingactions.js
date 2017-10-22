@@ -1,4 +1,4 @@
-"use strict"//gets the api info
+"use strict"//actions for user tha is going/canceling to/from a venue and also gets all people that are going to all venues from db
 import axios from 'axios'
 
 export function goToVenue(venueToGo){
@@ -24,7 +24,6 @@ export function goToVenue(venueToGo){
 
 }
 export function cancelVenue(venueToCancel){
-  console.log(venueToCancel)
   return function(dispatch){
     axios.delete('/api/cancel/'+JSON.stringify(venueToCancel))
       .then(function(response){
@@ -46,9 +45,9 @@ export function cancelVenue(venueToCancel){
   }
 
 }
-export function getGoers(venueToGo){
+export function getGoers(){//get all users that are going to all venues
   return function(dispatch){
-    axios.get('/api/going',venueToGo)
+    axios.get('/api/going')
       .then(function(response){
         dispatch(
           {

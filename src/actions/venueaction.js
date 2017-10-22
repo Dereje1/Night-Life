@@ -1,4 +1,4 @@
-"use strict"//gets the api info
+"use strict"//gets venues from yelp api and sends directly to reducer no db interaction in this route
 import axios from 'axios'
 
 export function fetchVenues(vquery){
@@ -17,28 +17,6 @@ export function fetchVenues(vquery){
         dispatch(
           {
             type:"GET_VENUES_ERROR",
-            payload:[err]
-          }
-        )
-      })
-  }
-
-}
-export function goToVenue(venueToGo){
-  return function(dispatch){
-    axios.post('/api/yelp/',venueToGo)
-      .then(function(response){
-        dispatch(
-          {
-            type:"GO_TO_VENUE",
-            payload:[response.data]
-          }
-        )
-      })
-      .catch(function(err){
-        dispatch(
-          {
-            type:"GO_TO_VENUE_ERROR",
             payload:[err]
           }
         )

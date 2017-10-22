@@ -37632,6 +37632,7 @@ var Menu = function (_React$Component) {
 function mapStateToProps(state) {
   return state;
 }
+//only reads store state does not write to it
 exports.default = (0, _reactRedux.connect)(mapStateToProps)(Menu);
 
 /***/ }),
@@ -49717,7 +49718,7 @@ module.exports = function spread(callback) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
- //displays a curated list of all the polls / user created polls
+ //main page listing all venues
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -49732,8 +49733,6 @@ var _react2 = _interopRequireDefault(_react);
 var _reactRedux = __webpack_require__(55);
 
 var _redux = __webpack_require__(43);
-
-var _reactRouter = __webpack_require__(125);
 
 var _reactDom = __webpack_require__(15);
 
@@ -49755,7 +49754,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } //need for redirecting user
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+//custom redux actions
+
+//custom react components
 
 
 var Home = function (_React$Component) {
@@ -49767,9 +49770,10 @@ var Home = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (Home.__proto__ || Object.getPrototypeOf(Home)).call(this, props));
 
     _this.state = {
-      matched: false,
-      userGoingYelpIDs: [],
-      othersGoingYelpIDS: []
+      matched: false, //true if all going are matched for the listed venues
+      userGoingYelpIDs: [], //all places the user is going in the db
+      othersGoingYelpIDS: [], //all places people other than the user are going in the db
+      updated: false //true if a new venue query has completed loading
     };
     _this.matchGoersWithVenues = _this.matchGoersWithVenues.bind(_this);
     return _this;
@@ -49779,24 +49783,31 @@ var Home = function (_React$Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       console.log("CDM Mounted for home");
-      this.props.fetchVenues();
-      this.props.getGoers();
+      this.props.fetchVenues(); //fetch venues with ip/session stored
+      this.props.getGoers(); //get all that are going to venues
     }
   }, {
     key: 'componentDidUpdate',
     value: function componentDidUpdate(prevProps, prevState) {
       if (!this.state.matched) {
         this.matchGoersWithVenues();
+      } //match goers then state to true
+      if (prevProps.venues.venues[0] !== this.props.venues.venues[0]) {
+        //if venues have changed means succesful loading
+        this.setState({ updated: true });
       }
     }
   }, {
     key: 'goingToVenue',
     value: function goingToVenue(venueID) {
+      //executes on going button click
       if (!this.props.user.user.authenticated) {
+        //if not authenticated simply redirect to twitter
         window.location = "/auth/twitter";
       } else {
+        //next check if user has already opted to go to the venue, if so....
         if (this.state.userGoingYelpIDs.includes(venueID)) {
-          var cancelInfo = {
+          var cancelInfo = { //set up delete query
             yelpID: venueID,
             userName: this.props.user.user.username
           };
@@ -49804,16 +49815,17 @@ var Home = function (_React$Component) {
           var indexOfDeletion = copyofGoing.findIndex(function (v) {
             return v === venueID;
           });
-          this.setState({
+          this.setState({ //delete from component state and when done delete from database
             userGoingYelpIDs: [].concat(_toConsumableArray(copyofGoing.slice(0, indexOfDeletion)), _toConsumableArray(copyofGoing.slice(indexOfDeletion + 1)))
           }, this.props.cancelVenue(cancelInfo));
         } else {
-          var addToGoers = {
+          //user has not opted to go yet
+          var addToGoers = { //set up add query
             yelpID: venueID,
             userName: this.props.user.user.username,
             timeStamp: Date.now()
           };
-          this.setState({
+          this.setState({ //add to component state and when done add to database
             userGoingYelpIDs: [].concat(_toConsumableArray(this.state.userGoingYelpIDs), [venueID])
           }, this.props.goToVenue(addToGoers));
         }
@@ -49822,40 +49834,52 @@ var Home = function (_React$Component) {
   }, {
     key: 'venueQuery',
     value: function venueQuery(e) {
-      //goest to a specific venue clicked by user
+      //finds venues per request type
       event.preventDefault();
-      this.setState({ matched: false,
-        userGoingYelpIDs: [],
-        othersGoingYelpIDS: []
-      });
       var venueSearch = (0, _reactDom.findDOMNode)(this.refs.venueQ).value.trim();
-      if (e.keyCode === 13) {
-        this.props.fetchVenues(venueSearch);
-        this.props.getGoers();
-        window.scroll(0, window.innerWidth * 0.42);
+      if (e.keyCode === 13 || e === "loc") {
+        //check if enter pressed or location button
+        this.setState({ matched: false,
+          userGoingYelpIDs: [],
+          othersGoingYelpIDS: [],
+          updated: false
+        }); //zero out component state
+        if (e === "loc") {
+          //if location button pressed , get venues by location from server
+          (0, _reactDom.findDOMNode)(this.refs.venueQ).value = "";
+          this.props.fetchVenues('byipforced');
+        } else {
+          //otherwise get venues by user search term from server
+          this.props.fetchVenues(venueSearch);
+        }
+        this.props.getGoers(); //update goers from db incase user has opted to go a venue on previous page
+        window.scroll(0, window.innerWidth * 0.46); //scroll down ,could update speed in the future
       }
     }
   }, {
     key: 'matchGoersWithVenues',
     value: function matchGoersWithVenues() {
+      //matches who is going with the currently loaded venue list
       if (!this.props.allGoers.allGoers.length) {
         return;
-      }
+      } //exit if going list is null
       var allgoing = this.props.allGoers.allGoers[0];
       var currrentUser = this.props.user.user.username;
-
+      //separately identify user going list from all others who are going and store yelp ids as they should be unique
       var venuesOfUserGoing = allgoing.filter(function (goers) {
         return goers.userName === currrentUser;
       });
       var userGoing = venuesOfUserGoing.map(function (v) {
         return v.yelpID;
       });
+
       var venuesOfOthersGoing = allgoing.filter(function (goers) {
         return goers.userName !== currrentUser;
       });
       var othersGoing = venuesOfOthersGoing.map(function (v) {
         return v.yelpID;
       });
+      //then set component's state accordingly
       this.setState({ userGoingYelpIDs: userGoing,
         othersGoingYelpIDS: othersGoing,
         matched: true
@@ -49866,19 +49890,31 @@ var Home = function (_React$Component) {
     value: function parseVenues() {
       var _this2 = this;
 
+      //main function to parse venue list from server
       var businesses = this.props.venues.venues[0].yelpFullResult.businesses;
-      var venuNames = businesses.map(function (b, idx) {
+
+      var allVenues = businesses.map(function (b, idx) {
+        //map thru all businesses returned
+        //if user is going to the business set val to 0 or 1
         var userGoing = _this2.state.userGoingYelpIDs.includes(b.id) ? 1 : 0;
-        var othersGoing = _this2.state.othersGoingYelpIDS.reduce(function (acc, curr, idx, arr) {
-          if (arr[idx] === b.id) {
+        //find total number of other people going to the business
+        var othersGoing = _this2.state.othersGoingYelpIDS.reduce(function (acc, curr, aidx, arr) {
+          if (arr[aidx] === b.id) {
             return acc + 1;
           } else {
             return acc + 0;
           }
         }, 0);
-        return _react2.default.createElement(_singlevenue2.default, { key: idx, business: b, onClick: _this2.goingToVenue.bind(_this2), going: userGoing + othersGoing });
+        return (//note props being sent to the dumb Singlevenue component and that onClick comes back to this component
+          _react2.default.createElement(_singlevenue2.default, {
+            key: idx,
+            business: b,
+            onClick: _this2.goingToVenue.bind(_this2),
+            going: userGoing + othersGoing
+          })
+        );
       });
-      return venuNames;
+      return allVenues;
     }
   }, {
     key: 'render',
@@ -49895,8 +49931,11 @@ var Home = function (_React$Component) {
         )
       );
       if (this.props.venues.venues.length) {
+        //ensure that venues are loaded before rendering
         if (!this.props.venues.venues[0].error) {
-
+          //also ensure that yelp has not returned an error
+          //conditional loading message
+          var updateMessage = this.state.updated ? "Showing Venues in " + this.props.venues.venues[0].yelpFullResult.businesses[0].location.city : "Loading Venues....";
           return _react2.default.createElement(
             _reactBootstrap.Grid,
             null,
@@ -49923,7 +49962,7 @@ var Home = function (_React$Component) {
                     _react2.default.createElement(
                       _reactBootstrap.Button,
                       { componentClass: _reactBootstrap.InputGroup.Button, style: { "height": "75px", "borderRadius": "0px 10px 10px 0px" }, type: 'submit', onClick: function onClick() {
-                          _this3.props.fetchVenues('byipforced');_this3.props.getGoers();
+                          return _this3.venueQuery("loc");
                         } },
                       _react2.default.createElement('span', { style: { "fontSize": "45px" }, className: 'fa fa-location-arrow' })
                     )
@@ -49936,9 +49975,8 @@ var Home = function (_React$Component) {
               { className: 'text-center' },
               _react2.default.createElement(
                 'h1',
-                null,
-                'Showing Venues in ',
-                this.props.venues.venues[0].yelpFullResult.businesses[0].location.city
+                { style: { "fontFamily": "Abril Fatface" } },
+                updateMessage
               )
             ),
             _react2.default.createElement(
@@ -49976,16 +50014,11 @@ var Home = function (_React$Component) {
           null,
           _react2.default.createElement(
             _reactBootstrap.Row,
-            { style: { "marginTop": "25px", "marginBottom": "25px" } },
-            _react2.default.createElement(_reactBootstrap.Image, { className: 'frontpic center-block', src: '/images/Wall_Food.jpg', rounded: true })
-          ),
-          _react2.default.createElement(
-            _reactBootstrap.Row,
             { style: { "marginTop": "25px" } },
             _react2.default.createElement(
               'h1',
               { className: 'text-center' },
-              'Loading Venues....'
+              'Loading....'
             )
           )
         );
@@ -50014,13 +50047,12 @@ exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
- //gets the api info
+ //gets venues from yelp api and sends directly to reducer no db interaction in this route
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.fetchVenues = fetchVenues;
-exports.goToVenue = goToVenue;
 
 var _axios = __webpack_require__(110);
 
@@ -50045,20 +50077,6 @@ function fetchVenues(vquery) {
       });
     });
   };
-}function goToVenue(venueToGo) {
-  return function (dispatch) {
-    _axios2.default.post('/api/yelp/', venueToGo).then(function (response) {
-      dispatch({
-        type: "GO_TO_VENUE",
-        payload: [response.data]
-      });
-    }).catch(function (err) {
-      dispatch({
-        type: "GO_TO_VENUE_ERROR",
-        payload: [err]
-      });
-    });
-  };
 }
 
 /***/ }),
@@ -50066,7 +50084,7 @@ function fetchVenues(vquery) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
- //gets the api info
+ //actions for user tha is going/canceling to/from a venue and also gets all people that are going to all venues from db
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -50096,7 +50114,6 @@ function goToVenue(venueToGo) {
     });
   };
 }function cancelVenue(venueToCancel) {
-  console.log(venueToCancel);
   return function (dispatch) {
     _axios2.default.delete('/api/cancel/' + JSON.stringify(venueToCancel)).then(function (response) {
       dispatch({
@@ -50111,9 +50128,10 @@ function goToVenue(venueToGo) {
     });
   };
 }
-function getGoers(venueToGo) {
+function getGoers() {
+  //get all users that are going to all venues
   return function (dispatch) {
-    _axios2.default.get('/api/going', venueToGo).then(function (response) {
+    _axios2.default.get('/api/going').then(function (response) {
       dispatch({
         type: "GET_VENUE_GOERS",
         payload: [response.data]
@@ -50132,7 +50150,7 @@ function getGoers(venueToGo) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+ //dumb component constructs a single venue
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -50170,17 +50188,19 @@ var Singlevenue = function (_Component) {
 
       var businessName = this.props.business.name;
       var yelpId = this.props.business.id;
+      //sometimes there are no images returned from yelp
       var thumbSource = this.props.business.image_url === '' ? '/images/NO-IMAGE.png' : this.props.business.image_url;
       var yelpLink = this.props.business.url;
       var description = this.props.business.categories.map(function (c) {
         return c.alias;
       }).join(' / ');
+      var buttonColor = this.props.going > 0 ? { "backgroundColor": "#b5b008" } : { "backgroundColor": "#ab99af" };
       return _react2.default.createElement(
         _reactBootstrap.Col,
         { className: 'venuecol', xs: 12, sm: 6, md: 4, lg: 3 },
         _react2.default.createElement(
           _reactBootstrap.Button,
-          { className: 'goingButton', block: true, onClick: function onClick() {
+          { className: 'goingButton', block: true, style: buttonColor, onClick: function onClick() {
               return _this2.props.onClick(yelpId);
             } },
           this.props.going,
@@ -50463,7 +50483,7 @@ exports.default = (0, _redux.combineReducers)({
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
- //reducer simply returns user status
+ //sets user status into store state
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -50486,7 +50506,7 @@ function userStatusReducer() {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+ //sets yelp returned venues into store state
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -50518,7 +50538,7 @@ function venueReducer() {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+ //gets/deletes/updates going users status into/from store state
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -50540,12 +50560,12 @@ function goersReducer() {
       return _extends({}, state, { allGoers: [].concat(_toConsumableArray(state.allGoers), _toConsumableArray(action.payload)) });
       break;
     case "CANCEL_VENUE":
+      //note deletion criteria different here from poll project, delete using username AND yelpID
       var venueCopy = [].concat(_toConsumableArray(state.allGoers));
       var indexOfDeletion = venueCopy.findIndex(function (venue) {
         return venue.userName === action.payload.userName && venue.yelpID === action.payload.yelpID;
       });
       var venuRemoved = [].concat(_toConsumableArray(venueCopy.slice(0, indexOfDeletion)), _toConsumableArray(venueCopy.slice(indexOfDeletion + 1)));
-
       return indexOfDeletion === -1 ? { allGoers: venueCopy } : { allGoers: venuRemoved };
       break;
     case "GET_VENUE_GOERS":

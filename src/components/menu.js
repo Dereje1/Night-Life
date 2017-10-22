@@ -47,4 +47,5 @@ class Menu extends React.Component{
 function mapStateToProps(state){
   return state
 }
+//only reads store state does not write to it
 export default connect(mapStateToProps)(Menu)

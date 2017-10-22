@@ -1,4 +1,4 @@
-"use strict"
+"use strict"//sets yelp returned venues into store state
 
 export function venueReducer(state={venues:[]},action){
   switch(action.type){
