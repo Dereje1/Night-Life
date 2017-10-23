@@ -1,9 +1,7 @@
 var path = require('path');
 const webpack = require('webpack');
 
-
-
-module.exports = {
+let configMain = {
  entry: './src/client.js',
  output: {
    filename: 'bundle.js',
@@ -22,12 +20,20 @@ module.exports = {
        }
      ]
    },
-   plugins: [
+   plugins: []
+ }
+//run this for production , note must set NODE_ENV to production in powershell where webpack is running PRIOR to running webpack
+//$env:NODE_ENV="production"
+ if(process.env.NODE_ENV==="production"){
+   configMain.plugins.push(
      new webpack.DefinePlugin({
       "process.env": {
          NODE_ENV: JSON.stringify("production")
        }
      }),
      new webpack.optimize.UglifyJsPlugin()
-   ]
+   )
+   configMain.watch = false
  }
+
+ module.exports = configMain

@@ -13,10 +13,11 @@ class Singlevenue extends Component {
     let description = this.props.business.categories.map((c)=>{
       return c.alias
     }).join(' / ')
-    let buttonColor = (this.props.going>0) ? {"backgroundColor":"#b5b008"} : {"backgroundColor":"#ab99af"}
+    let buttonColor = (this.props.going[1]>0) ? {"backgroundColor":"#b5b008"} : {"backgroundColor":"#ab99af"}
+    buttonColor = (this.props.going[0]>0) ?{"backgroundColor":"#ff0018"} : buttonColor
     return (
       <Col className="venuecol" xs={12} sm={6} md={4} lg={3}>
-          <Button className="goingButton" block style={buttonColor} onClick={()=>this.props.onClick(yelpId)} >{this.props.going} Going</Button>
+          <Button className="goingButton" block style={buttonColor} onClick={()=>this.props.onClick(yelpId)} >{this.props.going[0]+this.props.going[1]} Going</Button>
           <a href={yelpLink} target="_blank">
             <Image className="venueimg center-block" src={thumbSource} rounded />
           </a>

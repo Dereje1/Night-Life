@@ -127,7 +127,7 @@ class Home extends React.Component{
                 key={idx}
                 business={b}
                 onClick={this.goingToVenue.bind(this)}
-                going={userGoing+othersGoing}
+                going={[userGoing,othersGoing]}
                 />
               )
     })
