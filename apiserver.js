@@ -53,14 +53,24 @@ app.get('/yelp/:loc', function(req,res){//gets yelp data for query or if no quer
             headers:{"Authorization" : token.token_type+" "+token.access_token}
           })//pull yelp data
           .then(function(response) {
-                 let venuesToAdd = {//reorganize yelp response, add original query
-                   yelpFullResult:response.data,
-                   originalRequest: locationName
-                 }
-                   req.session.yelpVenues = venuesToAdd //store search in sesssion
-                   res.json(venuesToAdd);//send back to client
+                   if(response.data.businesses.length){
+                     let venuesToAdd = {//reorganize yelp response, add original query
+                       yelpFullResult:response.data,
+                       originalRequest: locationName
+                     }
+                     req.session.yelpVenues = venuesToAdd //store search in sesssion
+                     res.json(venuesToAdd);
+                   }
+                   else{//scenario where yelp returns empty businesses handle with fake error
+                     let errorToReact = {//create synthetic error
+                       error:"No businesses returned from yelp",
+                       originalRequest: req.params.loc
+                     }
+                     res.json(errorToReact);//send yelp error
+                   }
+                   //send back to client
           })
-          .catch(function(err){
+          .catch(function(err){//real error sent from yelp
             let errorToReact = {//reorganize error data so that client will understand/parse
               error:err.response.data,
               originalRequest: req.params.loc

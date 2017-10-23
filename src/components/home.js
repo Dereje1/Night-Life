@@ -31,7 +31,9 @@ class Home extends React.Component{
   componentDidUpdate(prevProps, prevState) {
     if(!this.state.matched){this.matchGoersWithVenues()}//match goers then state to true
     if(prevProps.venues.venues[0]!==this.props.venues.venues[0]){//if venues have changed means succesful loading
-      this.setState({updated:true})
+      this.setState({updated:true},
+        ()=>{findDOMNode(this.refs.venueQ).value =""}//callback after update to clear text from input form
+      )
     }
   }
   goingToVenue(venueID){//executes on going button click
@@ -76,7 +78,6 @@ class Home extends React.Component{
         updated:false
       })//zero out component state
       if(e==="loc"){//if location button pressed , get venues by location from server
-        findDOMNode(this.refs.venueQ).value =""
         this.props.fetchVenues('byipforced')
       }
       else{//otherwise get venues by user search term from server
@@ -133,8 +134,21 @@ class Home extends React.Component{
     })
     return(allVenues)
   }
-  render(){
+  createForm(){
     const tooltip = (<Tooltip id="tooltip"><strong> Current Location</strong></Tooltip>);
+    return(
+      <FormGroup>
+        <InputGroup >
+          <FormControl ref="venueQ"  type="text" onKeyDown={(e)=>this.venueQuery(e)} style={{"height":"75px","borderRadius":"10px 0 0px 10px","fontSize":"20px"}} placeholder="enter address, neighborhood, city, state or zip, optional country"/>
+          <OverlayTrigger placement="bottom" overlay={tooltip}>
+            <Button componentClass={InputGroup.Button} style={{"height":"75px","borderRadius":"0px 10px 10px 0px"}} type="submit" onClick ={()=>this.venueQuery("loc")}><span style={{"fontSize":"45px"}} className="fa fa-location-arrow"/></Button>
+          </OverlayTrigger>
+        </InputGroup>
+      </FormGroup>
+    )
+  }
+  render(){
+
     if(this.props.venues.venues.length){//ensure that venues are loaded before rendering
       if(!this.props.venues.venues[0].error){//also ensure that yelp has not returned an error
         //conditional loading message
@@ -145,14 +159,7 @@ class Home extends React.Component{
               <Image className="frontpic center-block" src="/images/Wall_Food.jpg" rounded />
             </Row>
             <Row>
-            <FormGroup>
-              <InputGroup >
-                <FormControl ref="venueQ"  type="text" onKeyDown={(e)=>this.venueQuery(e)} style={{"height":"75px","borderRadius":"10px 0 0px 10px","fontSize":"20px"}} placeholder="enter address, neighborhood, city, state or zip, optional country"/>
-                <OverlayTrigger placement="bottom" overlay={tooltip}>
-                  <Button componentClass={InputGroup.Button} style={{"height":"75px","borderRadius":"0px 10px 10px 0px"}} type="submit" onClick ={()=>this.venueQuery("loc")}><span style={{"fontSize":"45px"}} className="fa fa-location-arrow"/></Button>
-                </OverlayTrigger>
-              </InputGroup>
-            </FormGroup>
+              {this.createForm()}
             </Row>
             <Row className="text-center">
                 <h1 style={{"fontFamily":"Abril Fatface"}}>{updateMessage}</h1>
@@ -168,7 +175,7 @@ class Home extends React.Component{
          <Grid >
            <Row style={{"marginTop":"25px"}}>
                <h1 className="text-center">No Venues Found for {this.props.venues.venues[0].originalRequest}</h1>
-               <Button block className="btn btn-danger" onClick={()=>this.props.fetchVenues()}>Go Back</Button>
+               {this.createForm()}
            </Row>
          </Grid>
        )
