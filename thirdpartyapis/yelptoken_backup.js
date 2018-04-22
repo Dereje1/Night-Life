@@ -23,9 +23,9 @@ module.exports = function(){
           resolve(response.data)
          })
         .catch(function(err){
-          console.log(err.response.status)
-          console.log(err.response.data)
-          console.log(err.response.headers)
+          //console.log(err.response.status)
+          //console.log(err.response.data)
+          //console.log(err.response.headers)
           reject(err.response.data)
         })
     }
