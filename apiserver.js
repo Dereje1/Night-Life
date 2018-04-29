@@ -9,7 +9,6 @@ var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 
 //Custom made modules
-var yelptoken = require('./thirdpartyapis/yelptoken')//gets yelp token
 var convertIp = require('./thirdpartyapis/iptocity')//converts IP to city
 
 var app = express();
@@ -48,39 +47,34 @@ app.get('/yelp/:loc', function(req,res){//gets yelp data for query or if no quer
       else{//for a location query go with that
         locationName = req.params.loc
       }
-      yelptoken().then(function(token){//get yelp token and then
-        axios.get("https://api.yelp.com/v3/businesses/search?term=bars nightclubs&location="+locationName+"&limit=20",{
-            headers:{"Authorization" : token.token_type+" "+token.access_token}
-          })//pull yelp data
-          .then(function(response) {
-                   if(response.data.businesses.length){
-                     let venuesToAdd = {//reorganize yelp response, add original query
-                       yelpFullResult:response.data,
-                       originalRequest: locationName
-                     }
-                     req.session.yelpVenues = venuesToAdd //store search in sesssion
-                     res.json(venuesToAdd);
-                   }
-                   else{//scenario where yelp returns empty businesses handle with fake error
-                     let errorToReact = {//create synthetic error
-                       error:"No businesses returned from yelp",
-                       originalRequest: req.params.loc
-                     }
-                     res.json(errorToReact);//send yelp error
-                   }
-                   //send back to client
-          })
-          .catch(function(err){//real error sent from yelp
-            let errorToReact = {//reorganize error data so that client will understand/parse
-              error:err.response.data,
-              originalRequest: req.params.loc
-            }
-            res.json(errorToReact);//send yelp error
-          });
-      })
-      .catch(function(err){//token getting error
-        res.json(err)
-      })
+      axios.get("https://api.yelp.com/v3/businesses/search?term=bars nightclubs&location="+locationName+"&limit=20",{
+          headers:{"Authorization" : "Bearer " + process.env.YELP_API_KEY}
+        })//pull yelp data
+        .then(function(response) {
+                  if(response.data.businesses.length){
+                    let venuesToAdd = {//reorganize yelp response, add original query
+                      yelpFullResult:response.data,
+                      originalRequest: locationName
+                    }
+                    req.session.yelpVenues = venuesToAdd //store search in sesssion
+                    res.json(venuesToAdd);
+                  }
+                  else{//scenario where yelp returns empty businesses handle with fake error
+                    let errorToReact = {//create synthetic error
+                      error:"No businesses returned from yelp",
+                      originalRequest: req.params.loc
+                    }
+                    res.json(errorToReact);//send yelp error
+                  }
+                  //send back to client
+        })
+        .catch(function(err){//real error sent from yelp
+          let errorToReact = {//reorganize error data so that client will understand/parse
+            error:err.response.data,
+            originalRequest: req.params.loc
+          }
+          res.json(errorToReact);//send yelp error
+        });
     })
     .catch(function(err){//ip to city error
       console.log(err)
