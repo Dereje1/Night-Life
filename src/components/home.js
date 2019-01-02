@@ -113,6 +113,7 @@ class Home extends React.Component{
       })
   }
   parseVenues(){//main function to parse venue list from server
+    if (!this.state.updated) return null;
     let businesses = this.props.venues.venues[0].yelpFullResult.businesses
 
     let allVenues = businesses.map((b,idx)=>{//map thru all businesses returned
