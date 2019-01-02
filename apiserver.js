@@ -30,7 +30,10 @@ var db = require('./models/db') //mongoose required common db
 var going = require('./models/usersgoing') // VenueGoers schema
 
 app.get('/yelp/:loc', function(req,res){//gets yelp data for query or if no query ip/session data
-    convertIp().then(function(cityData){//first convert ip to city and then...
+    let headerObject = req.headers //need for ip	     convertIp().then(function(cityData){//first convert ip to city and then...
+    let ip = (headerObject['x-forwarded-for']||req.socket.remoteAddress).split(",")[0];	
+    ip = (ip === "::ffff:127.0.0.1") ? 'local' : ip //for local dev ip
+    convertIp(ip).then(function(cityData){//first convert ip to city and then...
       let locationName
       if (req.params.loc === 'byip'){//check if client is searching with current location and / or refresh / authentication reroute
         //if previous search already in session just return that
